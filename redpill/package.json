@@ -1,0 +1,53 @@
+{
+  "name": "redpill",
+  "version": "0.1.0",
+  "description": "AI-powered SDK for dynamic chart generation from any JSON data",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "CHART_INTEGRATION.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "charts",
+    "visualization",
+    "ai",
+    "llm",
+    "data",
+    "chart-generation"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/redpill.git",
+    "directory": "packages/js/redpill"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/redpill/issues"
+  },
+  "homepage": "https://github.com/your-org/redpill/tree/main/packages/js/redpill#readme",
+  "dependencies": {
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

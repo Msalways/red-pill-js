@@ -1,0 +1,26 @@
+# Source files
+src/
+
+# Test files
+**/__tests__/
+**/*.test.ts
+**/*.spec.ts
+
+# Config & build tool files
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+.eslintrc*
+.prettierrc*
+
+# Dev files
+test.mjs
+*.local
+
+# Node
+node_modules/
+
+# Misc
+.github/
+.env*
+*.log
