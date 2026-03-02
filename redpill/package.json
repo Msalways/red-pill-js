@@ -41,9 +41,6 @@
     "url": "https://github.com/your-org/redpill/issues"
   },
   "homepage": "https://github.com/your-org/redpill/tree/main/packages/js/redpill#readme",
-  "dependencies": {
-    "zod": "^3.22.0"
-  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "tsup": "^8.0.0",
