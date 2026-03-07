@@ -34,7 +34,7 @@ export async function callLLM(
   if (typeof llm === 'function') {
     return llm(messages, options);
   }
-  
+
   throw new Error(
     'LLM must be a function. Use .setLlm(async (messages, options) => { your_llm_call(messages, options) })'
   );
@@ -42,7 +42,7 @@ export async function callLLM(
 
 export class RedpillConfigBuilder {
   private config: RedpillConfig = {
-    temperature: 0.7,
+    temperature: 0.1,
     maxTokens: 4000,
     sampleSize: 100,
     debugMode: false,

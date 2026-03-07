@@ -1,94 +1,49 @@
 import { describe, it, expect } from 'vitest';
-import { DataFlattener, DataNormalizer } from '../processor.js';
-import { Executor } from '../executor.js';
+import { PolarsProcessor } from '../processor.js';
+import { PolarsExecutor } from '../executor.js';
 import { ChartSpecSchema } from '../schema.js';
 import { Redpill } from '../client.js';
 
-// ─── DataFlattener ───────────────────────────────────────────────────────────
-
-describe('DataFlattener', () => {
-    const flattener = new DataFlattener();
-
-    it('flattens a nested object with dot notation keys', () => {
-        const result = flattener.flatten({ user: { name: 'Alice', city: 'NY' }, score: 10 });
-        expect(result).toEqual({ 'user.name': 'Alice', 'user.city': 'NY', score: 10 });
-    });
-
-    it('returns null for null input', () => {
-        expect(flattener.flatten(null)).toBeNull();
-    });
+// ─── PolarsProcessor ────────────────────────────────────────────────────────
+describe('PolarsProcessor', () => {
+    const processor = new PolarsProcessor();
 
     it('processes an array of objects', () => {
-        const records = flattener.process([
+        const { profile, flat_data } = processor.process([
             { a: 1, b: { c: 2 } },
             { a: 3, b: { c: 4 } },
         ]);
-        expect(records).toHaveLength(2);
-        expect(records[0]).toEqual({ a: 1, 'b.c': 2 });
-        expect(records[1]).toEqual({ a: 3, 'b.c': 4 });
+        expect(flat_data).toHaveLength(2);
+        expect(flat_data[0]).toEqual({ a: 1, 'b.c': 2 });
     });
 
-    it('processes a wrapped object { key: [...] }', () => {
-        const records = flattener.process({ tickets: [{ id: 1, status: 'open' }] });
-        expect(records).toHaveLength(1);
-        expect(records[0]).toMatchObject({ id: 1, status: 'open' });
+    it('processes wrapped objects and drops arrays correctly', () => {
+        const { flat_data } = processor.process({ tickets: [{ id: 1, tags: ['a', 'b'] }] });
+        expect(flat_data).toHaveLength(1);
+        expect(flat_data[0]).toEqual({ id: 1 });
     });
 
-    it('drops nested arrays inside records', () => {
-        const result = flattener.flatten({ name: 'Bob', tags: ['a', 'b'] });
-        expect(result).toEqual({ name: 'Bob' });
-        expect(result).not.toHaveProperty('tags');
+    it('infers types correctly and collects categorical sample values', () => {
+        const data = [
+            { status: 'open', price: 100, date: '2024-01-01' },
+            { status: 'closed', price: 200, date: '2024-01-02' },
+        ];
+        const { profile } = processor.process(data);
+
+        expect(profile.row_count).toBe(2);
+        expect(profile.inferred.categorical_fields).toContain('status');
+        expect(profile.inferred.time_fields).toContain('date');
+
+        // Assert sample_values were collected for categorical fields
+        expect(profile.columns['status']?.sample_values).toEqual(
+            expect.arrayContaining(['open', 'closed'])
+        );
     });
 
-    it('returns empty array for empty array input', () => {
-        expect(flattener.process([])).toEqual([]);
-    });
-});
-
-// ─── DataNormalizer ──────────────────────────────────────────────────────────
-
-describe('DataNormalizer', () => {
-    const normalizer = new DataNormalizer();
-
-    it('infers "number" type for numeric values', () => {
-        expect(normalizer.inferFieldType([1, 2, 3, 4, 5])).toBe('number');
-    });
-
-    it('infers "string" type for string values', () => {
-        expect(normalizer.inferFieldType(['open', 'closed', 'pending'])).toBe('string');
-    });
-
-    it('infers "number" for currency strings', () => {
-        expect(normalizer.inferFieldType(['$1,200', '$500', '$3,400'])).toBe('number');
-    });
-
-    it('detects currency in string values', () => {
-        expect(normalizer.detectCurrency(['$1,200', '$500', '$300'])).toBe('currency');
-    });
-
-    it('returns null currency when no currency symbols', () => {
-        expect(normalizer.detectCurrency([100, 200, 300])).toBeNull();
-    });
-
-    it('parses a numeric string to a number', () => {
-        expect(normalizer.parseNumber('1,234.56')).toBeCloseTo(1234.56);
-    });
-
-    it('parses a currency string to a number', () => {
-        expect(normalizer.parseNumber('$1,200')).toBe(1200);
-    });
-
-    it('returns null when value is not parseable', () => {
-        expect(normalizer.parseNumber('hello')).toBeNull();
-    });
-
-    it('normalises a whole dataset correctly', () => {
-        const { normalized, metadata } = normalizer.normalizeData([
-            { status: 'open', amount: '$1,200' },
-            { status: 'closed', amount: '$500' },
-        ]);
-        expect(normalized[0].amount).toBe(1200);
-        expect(metadata.currency).toHaveProperty('amount');
+    it('returns empty profile for empty array input', () => {
+        const { profile, flat_data } = processor.process([]);
+        expect(flat_data).toEqual([]);
+        expect(profile.row_count).toBe(0);
     });
 });
 
@@ -139,10 +94,10 @@ describe('ChartSpecSchema', () => {
     });
 });
 
-// ─── Executor ────────────────────────────────────────────────────────────────
+// ─── PolarsExecutor ────────────────────────────────────────────────────────────────
 
-describe('Executor', () => {
-    const executor = new Executor();
+describe('PolarsExecutor', () => {
+    const executor = new PolarsExecutor();
 
     const rawData = [
         { status: 'open', priority: 'high', amount: 100 },
@@ -158,7 +113,7 @@ describe('Executor', () => {
             rawData
         );
         expect(result.data.length).toBe(3);
-        const open = result.data.find(d => d.x === 'open');
+        const open = result.data.find((d: any) => d.x === 'open');
         expect(open?.y).toBe(2);
     });
 
@@ -167,7 +122,7 @@ describe('Executor', () => {
             { xAxis: { field: 'status' }, yAxis: { field: 'amount', aggregation: 'sum' } },
             rawData
         );
-        const closed = result.data.find(d => d.x === 'closed');
+        const closed = result.data.find((d: any) => d.x === 'closed');
         expect(closed?.y).toBe(700);
     });
 
@@ -180,7 +135,7 @@ describe('Executor', () => {
             },
             rawData
         );
-        const total = result.data.reduce((sum, d) => sum + d.y, 0);
+        const total = result.data.reduce((sum: number, d: any) => sum + d.y, 0);
         expect(total).toBe(3); // 3 high priority records
     });
 
@@ -243,7 +198,7 @@ describe('Executor', () => {
             },
             rawData
         );
-        const ys = result.data.map(d => d.y);
+        const ys = result.data.map((d: any) => d.y);
         expect(ys).toEqual([...ys].sort((a, b) => a - b));
     });
 

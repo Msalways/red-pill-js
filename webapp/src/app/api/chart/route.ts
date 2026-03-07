@@ -8,7 +8,7 @@ let Redpill: any = null;
 
 async function getRedpill() {
   if (!Redpill) {
-    const module = await import('redpill');
+    const module = await import('redpillx');
     Redpill = module.Redpill;
   }
   return Redpill;
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const llmFunction = async (messages: any[], options?: any) => {
       try {
         const response = await client.chat.completions.create({
-          model: 'liquid/lfm-2.5-1.2b-thinking:free', // Your model choice
+          model: 'z-ai/glm-4.5-air:free', // Your model choice
           messages,
           temperature: options?.temperature ?? 0.7,
           max_tokens: options?.maxTokens ?? 4000,

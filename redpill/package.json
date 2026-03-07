@@ -1,5 +1,5 @@
 {
-  "name": "redpill",
+  "name": "redpillx",
   "version": "0.1.0",
   "description": "AI-powered SDK for dynamic chart generation from any JSON data",
   "main": "dist/index.js",
@@ -47,5 +47,8 @@
     "typescript": "^5.0.0",
     "vitest": "^1.0.0",
     "zod": "^4.3.6"
+  },
+  "dependencies": {
+    "nodejs-polars": "^0.24.1"
   }
 }

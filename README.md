@@ -31,11 +31,11 @@ The Redpill JS SDK lets you point a natural-language prompt + raw JSON at any LL
 ## Installation
 
 ```bash
-npm install redpill
+npm install redpillx
 # or
-yarn add redpill
+yarn add redpillx
 # or
-pnpm add redpill
+pnpm add redpillx
 ```
 
 > **Peer dependencies**: none. You only need your own LLM SDK (e.g. `openai`, `@anthropic-ai/sdk`).
@@ -45,7 +45,7 @@ pnpm add redpill
 ## Quick Start
 
 ```ts
-import { Redpill } from 'redpill';
+import { Redpill } from 'redpillx';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -127,7 +127,7 @@ ChartDataResult        – { data: ChartDataItem[], metadata: ChartMetadata }
 The primary fluent-builder entry point.
 
 ```ts
-import { Redpill } from 'redpill';
+import { Redpill } from 'redpillx';
 ```
 
 #### Constructor
@@ -206,7 +206,7 @@ Returns `ChartDataResult`:
 Alternative builder API (lower-level, returns a plain config + llm object):
 
 ```ts
-import { RedpillConfigBuilder } from 'redpill';
+import { RedpillConfigBuilder } from 'redpillx';
 
 const config = new RedpillConfigBuilder()
   .llm(myLlmFn)
@@ -225,8 +225,8 @@ Useful if you want to pass the config object to `IntentSpecAgent` directly.
 ### ChartSpec Schema
 
 ```ts
-import { ChartSpecSchema } from 'redpill';
-import type { ChartSpec } from 'redpill';
+import { ChartSpecSchema } from 'redpillx';
+import type { ChartSpec } from 'redpillx';
 ```
 
 Validated with [Zod](https://zod.dev). You can use the schema to parse/validate hand-crafted specs:
@@ -246,7 +246,7 @@ const spec = ChartSpecSchema.parse({
 Execute a spec independently (without the full `Redpill` client):
 
 ```ts
-import { Executor } from 'redpill';
+import { Executor } from 'redpillx';
 
 const executor = new Executor();
 const result = executor.execute(spec, rawData);
@@ -266,7 +266,7 @@ The `Executor` automatically:
 Low-level utilities for data preparation:
 
 ```ts
-import { DataFlattener, DataNormalizer } from 'redpill';
+import { DataFlattener, DataNormalizer } from 'redpillx';
 
 const flattener = new DataFlattener();
 const records = flattener.process({ users: [{ name: 'Alice', address: { city: 'NY' } }] });
@@ -284,8 +284,8 @@ const currency = normalizer.detectCurrency(['$1,200', '$500']);        // 'curre
 Lower-level access to the LLM agent:
 
 ```ts
-import { IntentSpecAgent } from 'redpill';
-import type { DataProfile, AgentConfig } from 'redpill';
+import { IntentSpecAgent } from 'redpillx';
+import type { DataProfile, AgentConfig } from 'redpillx';
 
 const agent = new IntentSpecAgent(myLlmFn, {
   temperature: 0.3,

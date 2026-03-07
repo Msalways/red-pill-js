@@ -1,24 +1,24 @@
 import { LLM, RedpillConfigBuilder, RedpillConfig } from './config/index.js';
 import { ChartSpec, ChartDataResult } from './schema.js';
-import { Executor } from './executor.js';
-import { DataFlattener, DataNormalizer } from './processor.js';
-import { IntentSpecAgent, DataProfile } from './agents/index.js';
+import { PolarsExecutor } from './executor.js';
+import { PolarsProcessor } from './processor.js';
+import { IntentSpecAgent } from './agents/index.js';
 
 export class Redpill {
   private llm: LLM | null = null;
   private config: RedpillConfig;
-  private flattener: DataFlattener;
-  private normalizer: DataNormalizer;
+  private processor: PolarsProcessor;
+  private executor: PolarsExecutor;
 
   constructor() {
     this.config = {
-      temperature: 0.7,
+      temperature: 0.1,
       maxTokens: 4000,
       sampleSize: 100,
       debugMode: false,
     };
-    this.flattener = new DataFlattener();
-    this.normalizer = new DataNormalizer();
+    this.processor = new PolarsProcessor();
+    this.executor = new PolarsExecutor();
   }
 
   /**
@@ -103,78 +103,30 @@ export class Redpill {
     prompt: string
   ): Promise<{ spec: ChartSpec }> {
     if (!this.llm) {
-      throw new Error('Please call .llm(yourLlm).build() first');
+      throw new Error('Please call .setLlm(yourLlm).build() first');
+    }
+    if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+      throw new Error('prompt must be a non-empty string');
+    }
+    if (data === null || data === undefined) {
+      throw new Error('data must not be null or undefined');
     }
 
-    const flatData = this.flattenData(data);
-    const profile = this.getDataProfile(flatData);
+    const { profile, flat_data } = this.processor.process(data);
+    
+    if (!flat_data || flat_data.length === 0) {
+      throw new Error('data contains no records — please provide a non-empty array or object with an array property');
+    }
 
     const agent = new IntentSpecAgent(this.llm, this.config);
-    return agent.run(prompt, profile, flatData);
+    return agent.run(prompt, profile, flat_data);
   }
 
   execute(spec: ChartSpec, data: Record<string, unknown>): ChartDataResult {
-    const flatData = this.flattenData(data);
-    const executor = new Executor();
-    return executor.execute(spec, flatData);
-  }
-
-  private flattenData(data: Record<string, unknown>): Record<string, unknown>[] {
-    if (Array.isArray(data)) {
-      return data.map((item) => this.flattenObject(item));
+    if (data === null || data === undefined) {
+      throw new Error('data must not be null or undefined');
     }
-
-    if (typeof data === 'object' && data !== null) {
-      for (const value of Object.values(data)) {
-        if (Array.isArray(value)) {
-          return value.map((item) => this.flattenObject(item));
-        }
-      }
-    }
-
-    return [this.flattenObject(data)];
-  }
-
-  private flattenObject(obj: unknown, prefix = ''): Record<string, unknown> {
-    const result: Record<string, unknown> = {};
-
-    if (typeof obj !== 'object' || obj === null) {
-      return result;
-    }
-
-    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-      const newKey = prefix ? `${prefix}.${key}` : key;
-
-      if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-        Object.assign(result, this.flattenObject(value, newKey));
-      } else if (!Array.isArray(value)) {
-        result[newKey] = value;
-      }
-    }
-
-    return result;
-  }
-
-  private getDataProfile(data: Record<string, unknown>[]): DataProfile {
-    if (!data.length) {
-      return { columns: [], types: {} };
-    }
-
-    const columns = Object.keys(data[0]);
-    const types: Record<string, string> = {};
-
-    for (const col of columns) {
-      const value = data[0][col];
-      if (typeof value === 'number') {
-        types[col] = 'number';
-      } else if (typeof value === 'string' && !isNaN(Date.parse(value))) {
-        types[col] = 'date';
-      } else {
-        types[col] = 'string';
-      }
-    }
-
-    return { columns, types };
+    return this.executor.execute(spec, data);
   }
 }
 

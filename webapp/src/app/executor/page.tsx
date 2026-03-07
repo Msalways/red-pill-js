@@ -55,7 +55,7 @@ export default function ExecutorPage() {
   const [error, setError] = useState('');
   const [selectedLibrary, setSelectedLibrary] = useState('recharts');
   const [savedSpecs, setSavedSpecs] = useState<SavedSpec[]>([]);
-  const [localStorageKey, setLocalStorageKey] = useState('redpill-js-specs');
+  const [localStorageKey, setLocalStorageKey] = useState('redpillx-js-specs');
 
   useEffect(() => {
     const saved = localStorage.getItem(localStorageKey);

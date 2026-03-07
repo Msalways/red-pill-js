@@ -7,7 +7,7 @@ let Executor: any = null;
 
 async function getExecutor() {
   if (!Executor) {
-    const module = await import('redpill');
+    const module = await import('redpillx');
     Executor = module.Executor;
   }
   return Executor;

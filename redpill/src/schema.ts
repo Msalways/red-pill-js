@@ -127,7 +127,7 @@ export interface ChartMetadata {
   warnings?: string[];
   originalCount?: number;
   filteredCount?: number;
-  currency?: Record<string, string>;
+  currency?: Record<string, boolean>;
 }
 
 export interface ChartDataResult {

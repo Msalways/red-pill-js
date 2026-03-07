@@ -1,9 +1,10 @@
 export { Redpill } from './client.js';
-export { Executor } from './executor.js';
+export { PolarsExecutor as Executor } from './executor.js';
 
-export { DataFlattener, DataNormalizer } from './processor.js';
+export { PolarsProcessor } from './processor.js';
+export type { DataRecord, DataProfile, ColInfo, FieldMetadata } from './processor.js';
 
-export { 
+export {
   ChartSpecSchema,
   ChartTypeSchema,
   AxisConfigSchema,
@@ -31,7 +32,7 @@ export type {
 } from './schema.js';
 
 export { IntentSpecAgent } from './agents/index.js';
-export type { DataProfile, AgentConfig } from './agents/index.js';
+export type { DataProfile as AgentDataProfile, AgentConfig } from './agents/index.js';
 
 export { RedpillConfigBuilder } from './config/index.js';
 export type { RedpillConfig } from './config/index.js';
