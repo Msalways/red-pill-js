@@ -1,6 +1,6 @@
 {
   "name": "redpillx",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "AI-powered SDK for dynamic chart generation from any JSON data",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
