@@ -34,13 +34,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/redpill.git",
-    "directory": "packages/js/redpill"
+    "url": "git+https://github.com/Msalways/red-pill-js.git",
+    "directory": "redpill"
   },
   "bugs": {
-    "url": "https://github.com/your-org/redpill/issues"
+    "url": "https://github.com/Msalways/red-pill-js/issues"
   },
-  "homepage": "https://github.com/your-org/redpill/tree/main/packages/js/redpill#readme",
+  "homepage": "https://github.com/Msalways/red-pill-js#readme",
   "devDependencies": {
     "@types/node": "^20.0.0",
     "tsup": "^8.0.0",
